@@ -6,7 +6,6 @@ import javafx.fxml.FXMLLoader;
 import javafx.scene.Scene;
 import javafx.stage.Stage;
 import java.io.IOException;
-
 public class CRUD extends Application {
     //Esta clase es la que habre la interfaz grafica
 

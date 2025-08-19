@@ -1,0 +1,45 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.scene.control.Button?>
+<?import javafx.scene.control.Label?>
+<?import javafx.scene.control.TableColumn?>
+<?import javafx.scene.control.TableView?>
+<?import javafx.scene.control.TextField?>
+<?import javafx.scene.layout.AnchorPane?>
+
+<AnchorPane prefHeight="814.0" prefWidth="1572.0" xmlns="http://javafx.com/javafx/23.0.1" xmlns:fx="http://javafx.com/fxml/1" fx:controller="Paquete.InterfazGrafica">
+
+    <!-- Campos de entrada -->
+    <Label layoutX="20.0" layoutY="20.0" text="Nombre" />
+    <TextField fx:id="textoNombre" layoutX="120.0" layoutY="15.0" prefHeight="25.0" prefWidth="511.0" />
+
+    <Label layoutX="20.0" layoutY="60.0" text="Dirección" />
+    <TextField fx:id="textoDireccion" layoutX="120.0" layoutY="55.0" prefHeight="25.0" prefWidth="511.0" />
+
+    <Label layoutX="20.0" layoutY="100.0" text="Teléfonos" />
+    <TextField fx:id="textoTelefonos" layoutX="120.0" layoutY="95.0" prefHeight="25.0" prefWidth="511.0" promptText="Separar varios con comas, ej: 555-1111,666-2222" />
+
+    <!-- Botones CRUD -->
+    <Button layoutX="764.0" layoutY="15.0" onAction="#crearRegistro" text="Crear" />
+    <Button layoutX="1110.0" layoutY="15.0" onAction="#modificarRegistro" text="Modificar" />
+    <Button layoutX="1426.0" layoutY="16.0" onAction="#borrarRegistro" text="Borrar" />
+
+    <!-- Tabla de Personas -->
+    <TableView fx:id="tablaPersonas" layoutX="20.0" layoutY="150.0" prefHeight="663.0" prefWidth="713.0">
+        <columns>
+            <TableColumn fx:id="columnaIdPersona" prefWidth="50.0" text="ID" />
+            <TableColumn fx:id="columnaNombre" prefWidth="323.0" text="Nombre" />
+            <TableColumn fx:id="columnaDireccion" prefWidth="339.0" text="Dirección" />
+        </columns>
+    </TableView>
+
+    <!-- Tabla de Teléfonos -->
+    <TableView fx:id="tablaTelefonos" layoutX="736.0" layoutY="150.0" prefHeight="663.0" prefWidth="815.0">
+        <columns>
+            <TableColumn fx:id="columnaIdTelefono" prefWidth="60.0" text="ID" />
+            <TableColumn fx:id="columnaPersonaId" prefWidth="67.0" text="ID Persona" />
+            <TableColumn fx:id="columnaTelefono" prefWidth="687.0" text="Teléfono" />
+        </columns>
+    </TableView>
+
+</AnchorPane>

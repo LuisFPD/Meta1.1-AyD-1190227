@@ -1,22 +1,33 @@
 package Paquete;
 
+import javafx.beans.property.IntegerProperty;
+import javafx.beans.property.SimpleIntegerProperty;
+import javafx.beans.property.SimpleStringProperty;
+import javafx.beans.property.StringProperty;
+//Clase que se encarga de guardar los datos de los telefonos
 public class Telefono {
-    private int id;
-    private int personaId;
-    private String telefono;
+
+    private final IntegerProperty id;
+    private final IntegerProperty personaId;
+    private final StringProperty telefono;
 
     public Telefono(int id, int personaId, String telefono) {
-        this.id = id;
-        this.personaId = personaId;
-        this.telefono = telefono;
+        this.id = new SimpleIntegerProperty(id);
+        this.personaId = new SimpleIntegerProperty(personaId);
+        this.telefono = new SimpleStringProperty(telefono);
     }
 
     public Telefono(int personaId, String telefono) {
-        this.personaId = personaId;
-        this.telefono = telefono;
+        this.id = new SimpleIntegerProperty(0);
+        this.personaId = new SimpleIntegerProperty(personaId);
+        this.telefono = new SimpleStringProperty(telefono);
     }
-    //Getters y setters
-    public int getId() { return id; }
-    public int getPersonaId() { return personaId; }
-    public String getTelefono() { return telefono; }
+
+    public int getPersonaId() { return personaId.get(); }
+    public String getTelefono() { return telefono.get(); }
+
+    public IntegerProperty idProperty() { return id; }
+    public IntegerProperty personaIdProperty() { return personaId; }
+    public StringProperty telefonoProperty() { return telefono; }
+
 }

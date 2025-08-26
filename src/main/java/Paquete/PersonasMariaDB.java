@@ -4,72 +4,91 @@ import java.sql.*;
 import java.util.ArrayList;
 import java.util.List;
 
+//Clase que se encarga de conectar la clase persona con la base
 public class PersonasMariaDB {
+
+    private static final String URL = "jdbc:mariadb://localhost:3307/agenda";
+    private static final String USER = "usuario1";
+    private static final String PASSWORD = "superpassword";
+
+    //Obtener todas las personas
     public static List<Persona> getAll() {
-        //Obtiene los datos de la persona de la base de datos
-        List<Persona> personas = new ArrayList<>();
+        List<Persona> lista = new ArrayList<>();
         String sql = "SELECT * FROM Personas";
-        try (Connection conn = Database.getConnection();
+
+        try (Connection conn = DriverManager.getConnection(URL, USER, PASSWORD);
              Statement stmt = conn.createStatement();
              ResultSet rs = stmt.executeQuery(sql)) {
+
             while (rs.next()) {
-                Persona p = new Persona(
-                        rs.getInt("id"),
-                        rs.getString("nombre"),
-                        rs.getString("direccion")
-                );
-                personas.add(p);
+                int id = rs.getInt("id");
+                String nombre = rs.getString("nombre");
+
+                //Traer direcciones de la persona
+                List<Direccion> dirs = DireccionesMariaDB.getByPersonaId(id);
+                List<String> direcciones = new ArrayList<>();
+                for (Direccion d : dirs) {
+                    direcciones.add(d.getDireccion());
+                }
+
+                lista.add(new Persona(id, nombre));
             }
+
         } catch (SQLException e) {
             e.printStackTrace();
         }
-        return personas;
+
+        return lista;
     }
 
-    public static int insert(Persona persona) {
-        //Inserta los datos de la persona en la base de datos
-        String sql = "INSERT INTO Personas (nombre, direccion) VALUES (?, ?)";
-        try (Connection conn = Database.getConnection();
+    //Insertar persona y devolver su ID generado
+    public static int insert(Persona p) {
+        String sql = "INSERT INTO Personas (nombre) VALUES (?)";
+        int idGenerado = -1;
+
+        try (Connection conn = DriverManager.getConnection(URL, USER, PASSWORD);
              PreparedStatement ps = conn.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS)) {
 
-            ps.setString(1, persona.getNombre());
-            ps.setString(2, persona.getDireccion());
+            ps.setString(1, p.getNombre());
             ps.executeUpdate();
 
             try (ResultSet rs = ps.getGeneratedKeys()) {
                 if (rs.next()) {
-                    return rs.getInt(1);
+                    idGenerado = rs.getInt(1);
                 }
             }
+
         } catch (SQLException e) {
             e.printStackTrace();
         }
-        return -1;
+
+        return idGenerado;
     }
 
-
-
-    public static void update(Persona persona) {
-        //Modifica los datos de la persona en la base de datos
-        String sql = "UPDATE Personas SET nombre=?, direccion=? WHERE id=?";
-        try (Connection conn = Database.getConnection();
+    //Actualizar persona
+    public static void update(Persona p) {
+        String sql = "UPDATE Personas SET nombre = ? WHERE id = ?";
+        try (Connection conn = DriverManager.getConnection(URL, USER, PASSWORD);
              PreparedStatement ps = conn.prepareStatement(sql)) {
-            ps.setString(1, persona.getNombre());
-            ps.setString(2, persona.getDireccion());
-            ps.setInt(3, persona.getId());
+
+            ps.setString(1, p.getNombre());
+            ps.setInt(2, p.getId());
             ps.executeUpdate();
+
         } catch (SQLException e) {
             e.printStackTrace();
         }
     }
 
+    //Borrar persona
     public static void delete(int id) {
-        //Borra los datos de la persona de la base de datos
-        String sql = "DELETE FROM Personas WHERE id=?";
-        try (Connection conn = Database.getConnection();
+        String sql = "DELETE FROM Personas WHERE id = ?";
+        try (Connection conn = DriverManager.getConnection(URL, USER, PASSWORD);
              PreparedStatement ps = conn.prepareStatement(sql)) {
+
             ps.setInt(1, id);
             ps.executeUpdate();
+
         } catch (SQLException e) {
             e.printStackTrace();
         }

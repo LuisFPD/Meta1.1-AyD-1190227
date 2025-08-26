@@ -4,135 +4,179 @@ import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.fxml.FXML;
 import javafx.scene.control.*;
-
+//Clase encargada de darle función a la interfaz grafica
 public class InterfazGrafica {
 
+    //Campos de entrada
     @FXML private TextField textoNombre;
-    @FXML private TextField textoDireccion;
+    @FXML private TextField textoDirecciones;
     @FXML private TextField textoTelefonos;
 
+    //Tabla de Personas
     @FXML private TableView<Persona> tablaPersonas;
     @FXML private TableColumn<Persona, Integer> columnaIdPersona;
     @FXML private TableColumn<Persona, String> columnaNombre;
-    @FXML private TableColumn<Persona, String> columnaDireccion;
 
+
+    //Tabla de Direcciones
+    @FXML private TableView<Direccion> tablaDirecciones;
+    @FXML private TableColumn<Direccion, Integer> columnaIdDireccion;
+    @FXML private TableColumn<Direccion, Integer> columnaPersonaIdDir; // ID Persona
+    @FXML private TableColumn<Direccion, String> columnaDireccionDetalle;
+
+    //Tabla de Teléfonos
     @FXML private TableView<Telefono> tablaTelefonos;
     @FXML private TableColumn<Telefono, Integer> columnaIdTelefono;
-    @FXML private TableColumn<Telefono, Integer> columnaPersonaId;
+    @FXML private TableColumn<Telefono, Integer> columnaPersonaIdTel; // ID Persona
     @FXML private TableColumn<Telefono, String> columnaTelefono;
 
+    //Listas observables
     private ObservableList<Persona> listaPersonas;
+    private ObservableList<Direccion> listaDirecciones;
     private ObservableList<Telefono> listaTelefonos;
 
     @FXML
     public void initialize() {
-        //Obtenemos los datos de las tablas
-        columnaIdPersona.setCellValueFactory(c -> new javafx.beans.property.SimpleIntegerProperty(c.getValue().getId()).asObject());
-        columnaNombre.setCellValueFactory(c -> new javafx.beans.property.SimpleStringProperty(c.getValue().getNombre()));
-        columnaDireccion.setCellValueFactory(c -> new javafx.beans.property.SimpleStringProperty(c.getValue().getDireccion()));
+        // ---------------- Tabla de Personas ----------------
+        columnaIdPersona.setCellValueFactory(c ->
+                new javafx.beans.property.SimpleIntegerProperty(c.getValue().getId()).asObject()
+        );
+        columnaNombre.setCellValueFactory(c ->
+                new javafx.beans.property.SimpleStringProperty(c.getValue().getNombre())
+        );
 
-        columnaIdTelefono.setCellValueFactory(c -> new javafx.beans.property.SimpleIntegerProperty(c.getValue().getId()).asObject());
-        columnaPersonaId.setCellValueFactory(c -> new javafx.beans.property.SimpleIntegerProperty(c.getValue().getPersonaId()).asObject());
-        columnaTelefono.setCellValueFactory(c -> new javafx.beans.property.SimpleStringProperty(c.getValue().getTelefono()));
 
+        //Direcciones
+        columnaIdDireccion.setCellValueFactory(c -> c.getValue().idProperty().asObject());
+        columnaPersonaIdDir.setCellValueFactory(c -> c.getValue().personaIdProperty().asObject());
+        columnaDireccionDetalle.setCellValueFactory(c -> c.getValue().direccionProperty());
+
+        //Telefonos
+        columnaIdTelefono.setCellValueFactory(c -> c.getValue().idProperty().asObject());
+        columnaPersonaIdTel.setCellValueFactory(c -> c.getValue().personaIdProperty().asObject());
+        columnaTelefono.setCellValueFactory(c -> c.getValue().telefonoProperty());
+
+        //Personas
         tablaPersonas.getSelectionModel().selectedItemProperty().addListener((obs, oldSel, newSel) -> {
             if (newSel != null) {
+                cargarDirecciones(newSel.getId());
                 cargarTelefonos(newSel.getId());
-                //Aqui nos encargamos de separar los telefonos los cuales seran delimitados por comas ,
-                String telefonosStr = String.join(",",
-                        listaTelefonos.stream().map(Telefono::getTelefono).toList());
-                textoTelefonos.setText(telefonosStr);
                 textoNombre.setText(newSel.getNombre());
-                textoDireccion.setText(newSel.getDireccion());
+
+                //mostrar direcciones y teléfonos como texto separado por comas
+                textoDirecciones.setText(String.join(",", listaDirecciones.stream().map(Direccion::getDireccion).toList()));
+                textoTelefonos.setText(String.join(",", listaTelefonos.stream().map(Telefono::getTelefono).toList()));
             } else {
+                tablaDirecciones.getItems().clear();
                 tablaTelefonos.getItems().clear();
-                textoTelefonos.clear();
                 textoNombre.clear();
-                textoDireccion.clear();
+                textoDirecciones.clear();
+                textoTelefonos.clear();
             }
         });
 
+        //Cargar personas al iniciar
         cargarPersonas();
     }
 
     private void cargarPersonas() {
         listaPersonas = FXCollections.observableArrayList(PersonasMariaDB.getAll());
         tablaPersonas.setItems(listaPersonas);
-        tablaPersonas.refresh();
+    }
+
+    private void cargarDirecciones(int personaId) {
+        listaDirecciones = FXCollections.observableArrayList(DireccionesMariaDB.getByPersonaId(personaId));
+        tablaDirecciones.setItems(listaDirecciones);
     }
 
     private void cargarTelefonos(int personaId) {
         listaTelefonos = FXCollections.observableArrayList(TelefonosMariaDB.getByPersonaId(personaId));
         tablaTelefonos.setItems(listaTelefonos);
-        tablaTelefonos.refresh();
     }
 
     @FXML
     private void crearRegistro() {
-        //Se encarga de registrar los datos de las personas en ambas tablas
-        if (!textoNombre.getText().isEmpty() && !textoDireccion.getText().isEmpty()) {
-            Persona persona = new Persona(textoNombre.getText(), textoDireccion.getText());
+        if (!textoNombre.getText().isEmpty()) {
+            Persona persona = new Persona(textoNombre.getText());
             int personaId = PersonasMariaDB.insert(persona);
-            if (personaId > 0) {
-                if (!textoTelefonos.getText().isEmpty()) {
-                    String[] telefonos = textoTelefonos.getText().split(",");
-                    for (String t : telefonos) {
-                        String tel = t.trim();
-                        if (!tel.isEmpty()) {
-                            TelefonosMariaDB.insert(new Telefono(personaId, tel));
-                        }
+
+            // Guardar direcciones
+            if (!textoDirecciones.getText().isEmpty()) {
+                String[] dirs = textoDirecciones.getText().split(",");
+                for (String d : dirs) {
+                    String dir = d.trim();
+                    if (!dir.isEmpty()) {
+                        DireccionesMariaDB.insertForPersona(personaId, dir);
                     }
                 }
-                cargarPersonas();
-                Persona nueva = listaPersonas.stream()
-                        .filter(p -> p.getId() == personaId)
-                        .findFirst()
-                        .orElse(null);
-                if (nueva != null) {
-                    tablaPersonas.getSelectionModel().select(nueva);
-                    cargarTelefonos(personaId);
-                }
-                textoNombre.clear();
-                textoDireccion.clear();
-                textoTelefonos.clear();
             }
+
+            //Guardamos los telefonos
+            if (!textoTelefonos.getText().isEmpty()) {
+                String[] tels = textoTelefonos.getText().split(",");
+                for (String t : tels) {
+                    String tel = t.trim();
+                    if (!tel.isEmpty()) {
+                        TelefonosMariaDB.insert(new Telefono(personaId, tel));
+                    }
+                }
+            }
+
+            cargarPersonas();
+            textoNombre.clear();
+            textoDirecciones.clear();
+            textoTelefonos.clear();
         }
     }
 
     @FXML
     private void modificarRegistro() {
-        //Se selecciona una persona y se modifican sus datos
         Persona persona = tablaPersonas.getSelectionModel().getSelectedItem();
         if (persona != null) {
             persona.setNombre(textoNombre.getText());
-            persona.setDireccion(textoDireccion.getText());
             PersonasMariaDB.update(persona);
+
+            DireccionesMariaDB.deleteByPersonaId(persona.getId());
+            if (!textoDirecciones.getText().isEmpty()) {
+                String[] dirs = textoDirecciones.getText().split(",");
+                for (String d : dirs) {
+                    String dir = d.trim();
+                    if (!dir.isEmpty()) {
+                        DireccionesMariaDB.insertForPersona(persona.getId(), dir);
+                    }
+                }
+            }
+
             TelefonosMariaDB.deleteByPersonaId(persona.getId());
             if (!textoTelefonos.getText().isEmpty()) {
-                String[] telefonos = textoTelefonos.getText().split(",");
-                for (String t : telefonos) {
+                String[] tels = textoTelefonos.getText().split(",");
+                for (String t : tels) {
                     String tel = t.trim();
                     if (!tel.isEmpty()) {
                         TelefonosMariaDB.insert(new Telefono(persona.getId(), tel));
                     }
                 }
             }
+
             cargarPersonas();
+            cargarDirecciones(persona.getId());
             cargarTelefonos(persona.getId());
         }
     }
 
     @FXML
     private void borrarRegistro() {
-        //Se limpian todos los datos de la persona y se eliminan de las tablas
         Persona persona = tablaPersonas.getSelectionModel().getSelectedItem();
         if (persona != null) {
+            DireccionesMariaDB.deleteByPersonaId(persona.getId());
             TelefonosMariaDB.deleteByPersonaId(persona.getId());
             PersonasMariaDB.delete(persona.getId());
+
             cargarPersonas();
+            tablaDirecciones.getItems().clear();
             tablaTelefonos.getItems().clear();
             textoNombre.clear();
-            textoDireccion.clear();
+            textoDirecciones.clear();
             textoTelefonos.clear();
         }
     }

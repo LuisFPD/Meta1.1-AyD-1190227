@@ -1,4 +1,4 @@
-//Meta 1.1 Analisis y diseño de sistemas - Luis Fernando Prieto Duarte
+//Meta 1.2 Analisis y diseño de sistemas - Luis Fernando Prieto Duarte
 package Paquete;
 
 import javafx.application.Application;

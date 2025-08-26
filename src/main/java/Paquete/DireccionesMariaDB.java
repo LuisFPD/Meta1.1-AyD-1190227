@@ -3,28 +3,30 @@ package Paquete;
 import java.sql.*;
 import java.util.ArrayList;
 import java.util.List;
-//Clase que conecta a los telefonos con la base de datos
-public class TelefonosMariaDB {
+//Nueva clase que se encarga de conectar las direcciones con la base de datos
+public class DireccionesMariaDB {
 
     private static final String URL = "jdbc:mariadb://localhost:3307/agenda";
     private static final String USER = "usuario1";
     private static final String PASSWORD = "superpassword";
 
-    public static List<Telefono> getByPersonaId(int personaId) {
-        List<Telefono> lista = new ArrayList<>();
-        String sql = "SELECT * FROM Telefonos WHERE personaId = ?";
+    //Obtenemos las direcciones de una persona
+    public static List<Direccion> getByPersonaId(int personaId) {
+        List<Direccion> lista = new ArrayList<>();
+        String sql = "SELECT id, direccion FROM Direcciones WHERE personaId = ?";
+
         try (Connection conn = DriverManager.getConnection(URL, USER, PASSWORD);
              PreparedStatement ps = conn.prepareStatement(sql)) {
 
             ps.setInt(1, personaId);
             ResultSet rs = ps.executeQuery();
+
             while (rs.next()) {
-                lista.add(new Telefono(
-                        rs.getInt("id"),
-                        rs.getInt("personaId"),
-                        rs.getString("telefono")
-                ));
+                int id = rs.getInt("id");
+                String direccion = rs.getString("direccion");
+                lista.add(new Direccion(id, personaId, direccion));
             }
+            rs.close();
 
         } catch (SQLException e) {
             e.printStackTrace();
@@ -32,13 +34,15 @@ public class TelefonosMariaDB {
         return lista;
     }
 
-    public static void insert(Telefono t) {
-        String sql = "INSERT INTO Telefonos(personaId, telefono) VALUES(?, ?)";
-        try (Connection conn = DriverManager.getConnection(URL, USER, PASSWORD);
-             PreparedStatement ps = conn.prepareStatement(sql)) {
+    //Agregamos una dirección para una persona
+    public static void insertForPersona(int personaId, String direccion) {
+        String sqlInsertDir = "INSERT INTO Direcciones (personaId, direccion) VALUES (?, ?)";
 
-            ps.setInt(1, t.getPersonaId());
-            ps.setString(2, t.getTelefono());
+        try (Connection conn = DriverManager.getConnection(URL, USER, PASSWORD);
+             PreparedStatement ps = conn.prepareStatement(sqlInsertDir, Statement.RETURN_GENERATED_KEYS)) {
+
+            ps.setInt(1, personaId);
+            ps.setString(2, direccion);
             ps.executeUpdate();
 
         } catch (SQLException e) {
@@ -46,8 +50,9 @@ public class TelefonosMariaDB {
         }
     }
 
+    //Eliminamos todas las direcciones asociadas a una persona
     public static void deleteByPersonaId(int personaId) {
-        String sql = "DELETE FROM Telefonos WHERE personaId = ?";
+        String sql = "DELETE FROM Direcciones WHERE personaId = ?";
         try (Connection conn = DriverManager.getConnection(URL, USER, PASSWORD);
              PreparedStatement ps = conn.prepareStatement(sql)) {
 

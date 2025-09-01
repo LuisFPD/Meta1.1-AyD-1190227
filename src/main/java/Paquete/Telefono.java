@@ -4,9 +4,11 @@ import javafx.beans.property.IntegerProperty;
 import javafx.beans.property.SimpleIntegerProperty;
 import javafx.beans.property.SimpleStringProperty;
 import javafx.beans.property.StringProperty;
-//Clase que se encarga de guardar los datos de los telefonos
+//Clase que unicamente gestiona los datos de los telefonos con el fundamento
+//Single Responsibility Principle (SRP)
 public class Telefono {
-
+    //Se utilizan private final para asegurar que los valores sean cerrados a modificaciones
+    //O - Open/Closed Principle (OCP)
     private final IntegerProperty id;
     private final IntegerProperty personaId;
     private final StringProperty telefono;

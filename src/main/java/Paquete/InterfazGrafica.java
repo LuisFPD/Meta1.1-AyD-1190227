@@ -5,6 +5,10 @@ import javafx.collections.ObservableList;
 import javafx.fxml.FXML;
 import javafx.scene.control.*;
 //Clase encargada de darle función a la interfaz grafica
+//Esta intefaz utiliza todos los métodos creados en esta clase
+//I - Interface Segregation Principle (ISP)
+//Otras clases de alto y bajo nivel dependen de la interfaz gráfica
+//D - Dependency Inversion Principle (DIP)
 public class InterfazGrafica {
 
     //Campos de entrada
@@ -12,25 +16,29 @@ public class InterfazGrafica {
     @FXML private TextField textoDirecciones;
     @FXML private TextField textoTelefonos;
 
-    //Tabla de Personas
+    //Tabla de Personas que no alteraa a la superclase
+    //L - Liskov Substitution Principle (LSP)
     @FXML private TableView<Persona> tablaPersonas;
     @FXML private TableColumn<Persona, Integer> columnaIdPersona;
     @FXML private TableColumn<Persona, String> columnaNombre;
 
 
-    //Tabla de Direcciones
+    //Tabla de Direcciones que no altera a la superclase
+    //L - Liskov Substitution Principle (LSP)
     @FXML private TableView<Direccion> tablaDirecciones;
     @FXML private TableColumn<Direccion, Integer> columnaIdDireccion;
     @FXML private TableColumn<Direccion, Integer> columnaPersonaIdDir; // ID Persona
     @FXML private TableColumn<Direccion, String> columnaDireccionDetalle;
 
-    //Tabla de Teléfonos
+    //Tabla de Teléfonos que no altera a la superclase
+    //L - Liskov Substitution Principle (LSP)
     @FXML private TableView<Telefono> tablaTelefonos;
     @FXML private TableColumn<Telefono, Integer> columnaIdTelefono;
     @FXML private TableColumn<Telefono, Integer> columnaPersonaIdTel; // ID Persona
     @FXML private TableColumn<Telefono, String> columnaTelefono;
 
-    //Listas observables
+    //Listas observables que no altera a la superclase
+    //L - Liskov Substitution Principle (LSP)
     private ObservableList<Persona> listaPersonas;
     private ObservableList<Direccion> listaDirecciones;
     private ObservableList<Telefono> listaTelefonos;

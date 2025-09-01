@@ -1,8 +1,10 @@
 package Paquete;
 
-//Clase que se encarga de tomar los datos de las personas
+//Clase que unicamente gestiona los datos de las personas con el fundamento
+//Single Responsibility Principle (SRP)
 public class Persona {
-
+    //Se utilizan private para asegurar que los valores sean cerrados a modificaciones
+    //O - Open/Closed Principle (OCP)
     private int id;
     private String nombre;
 

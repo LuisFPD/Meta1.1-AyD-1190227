@@ -4,9 +4,11 @@ import javafx.beans.property.IntegerProperty;
 import javafx.beans.property.SimpleIntegerProperty;
 import javafx.beans.property.SimpleStringProperty;
 import javafx.beans.property.StringProperty;
-//Nueva clase la cual contiene los datos que contiene cada direccion de la tabla de direcciones
+//Clase que unicamente gestiona los datos de las direcciones con el fundamento
+//Single Responsibility Principle (SRP)
 public class Direccion {
-
+    //Se utilizan private final para asegurar que los valores sean cerrados a modificaciones
+    //O - Open/Closed Principle (OCP)
     private final IntegerProperty id;
     private final IntegerProperty personaId;
     private final StringProperty direccion;
